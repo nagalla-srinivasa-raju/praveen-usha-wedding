@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wedding Scroll Animations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+      align-items:center;
+      min-height:200vh;
+      background:#fff8f5;
+      text-align:center;
+      font-family:'Playfair Display', serif;
+      color:#b76e79;
+      gap:50px;
+      padding-top:50px;
+    }
+    audio { display:none; } /* hide player */
+  </style>
+</head>
+<body>
+
+  <!-- Hidden Background Music -->
+  <audio id="bg-music" loop>
+    <source src="music.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <h2 class="letter-animation">Praveen & Usha</h2>
+  <h3 class="letter-animation">Your Presence is a Gift</h3>
+  <h5 class="slide-left">We are Happy with your presence</h5>
+  <p class="fade-scale">Request The Honor of Your Presence at Our Wedding Ceremony and Reception</p>
+
+  <script>
+    // -------------------------
+    // Scroll-triggered animations
+    // -------------------------
+    function animateOnScroll(entries, observer) {
+      entries.forEach(entry => {
+        if(entry.isIntersecting) {
+          const el = entry.target;
+
+          if(el.classList.contains('letter-animation')) {
+            const text = el.textContent.trim();
+            el.textContent = '';
+            text.split('').forEach((char, i) => {
+              const span = document.createElement('span');
+              span.innerHTML = char === ' ' ? '&nbsp;' : char;
+              span.style.opacity = 0;
+              span.style.display = 'inline-block';
+              span.style.transform = 'translateY(15px)';
+              el.appendChild(span);
+              setTimeout(() => {
+                span.style.transition = 'all 0.6s ease';
+                span.style.opacity = 1;
+                span.style.transform = 'translateY(0)';
+              }, i * 60);
+            });
+          }
+
+          if(el.classList.contains('slide-left')) {
+            el.style.opacity = 0;
+            el.style.transform = 'translateX(-50px)';
+            setTimeout(() => {
+              el.style.transition = 'all 1s ease';
+              el.style.opacity = 1;
+              el.style.transform = 'translateX(0)';
+            }, 100);
+          }
+
+          if(el.classList.contains('fade-scale')) {
+            el.style.opacity = 0;
+            el.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+              el.style.transition = 'all 1s ease';
+              el.style.opacity = 1;
+              el.style.transform = 'scale(1)';
+            }, 100);
+          }
+
+          observer.unobserve(el);
+        }
+      });
+    }
+
+    const observer = new IntersectionObserver(animateOnScroll, { threshold: 0.1 });
+    document.querySelectorAll('.letter-animation, .slide-left, .fade-scale').forEach(el => observer.observe(el));
+
+    // -------------------------
+    // Play music on first interaction (desktop & mobile)
+    // -------------------------
+    const music = document.getElementById('bg-music');
+
+    function playMusicFadeIn() {
+      document.removeEventListener('click', playMusicFadeIn);
+      document.removeEventListener('touchstart', playMusicFadeIn);
+
+      music.volume = 0;
+      const playPromise = music.play();
+
+      if(playPromise !== undefined){
+        playPromise.then(() => {
+          let vol = 0;
+          const fade = setInterval(() => {
+            vol += 0.02;
+            if(vol >= 1){
+              music.volume = 1;
+              clearInterval(fade);
+            } else {
+              music.volume = vol;
+            }
+          }, 60); // ~3 seconds fade-in
+        }).catch(err => {
+          console.log("Playback blocked:", err);
+        });
+      }
+    }
+
+    // ✅ Listen for **first click or touch**
+    document.addEventListener('click', playMusicFadeIn, { once: true });
+    document.addEventListener('touchstart', playMusicFadeIn, { once: true });
+  </script>
+
+</body>
+</html>
